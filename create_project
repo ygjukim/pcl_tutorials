@@ -1,4 +1,5 @@
 #!/bin/sh
 
 mkdir $1
+mkdir $1/build
 rsync -rtv 00_project_template/ $1/
