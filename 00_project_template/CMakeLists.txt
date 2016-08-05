@@ -10,5 +10,5 @@ add_definitions(${PCL_DEFINITIONS})
  
 set(PCL_BUILD_TYPE Release)
  
-add_executable(binarye_file_name "src/source.cpp") 
+add_executable(binarye_file_name "src/main.cpp") 
 target_link_libraries (binary_file_name ${PCL_LIBRARIES})

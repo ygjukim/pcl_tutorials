@@ -1,0 +1,1 @@
+This is a skeleton of cmake project for the creation of a project in CLI.
