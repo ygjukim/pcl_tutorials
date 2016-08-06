@@ -1,5 +1,10 @@
 #!/bin/sh
 
+if [ -z "$1" ] ; then
+    echo "No project name."
+    exit 1
+fi
+
 mkdir $1
 mkdir $1/build
 rsync -rtv 00_project_template/ $1/
