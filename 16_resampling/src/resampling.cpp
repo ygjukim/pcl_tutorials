@@ -11,11 +11,12 @@ using namespace pcl;
 
 void printUsage(const char *progName)
 {
-	cout << "Usage: " << progName << " [-d|-k|-u] pcd_file\n"
+	cout << "Usage: " << progName << " [-d|-k|-u|-s] pcd_file\n"
 		 << "Options:\n"
 		 << "  -d\tdownsampling using VoxelGrid filter\n"
 		 << "  -k\tchoosing keypoints using Uniform Sampling\n"
-		 << "  -u\tupsampling usin MLS(Moving Least Squares)\n"
+		 << "  -u\tupsampling using MLS(Moving Least Squares)\n"
+		 << "  -s\tsurface smoothing using MLS(Moving Least Squares)\n"
 		 << "  -h\tshow this help\n"
 		 << "\n";
 }
@@ -31,7 +32,8 @@ int main(int argc, char** argv)
 		return 0;
 	}
 
-	bool downsampling(false), uniform_sampling(false), upsampling(false), resampled(false);
+	bool downsampling(false), uniform_sampling(false), upsampling(false), 
+		resampled(false), surface_smoothing(false);
 
 	if (console::find_argument(argc, argv, "-d") >=0)
 	{
@@ -44,6 +46,10 @@ int main(int argc, char** argv)
 	else if (console::find_argument(argc, argv, "-u") >=0)
 	{
 		upsampling = true;
+	}
+	else if (console::find_argument(argc, argv, "-s") >=0)
+	{
+		surface_smoothing = true;
 	}
 	else 
 	{
@@ -115,6 +121,27 @@ int main(int argc, char** argv)
 		filter.setUpsamplingRadius(0.03);
 		// Sampling step size. Bigger values will yield less (if any) new points.
 		filter.setUpsamplingStepSize(0.02);
+
+		filter.process(*filtered_cloud);
+	}
+	else if (surface_smoothing)
+	{
+		vector<int> mapping;
+		removeNaNFromPointCloud(*source_cloud, *source_cloud, mapping);
+
+		// Filtering object.
+		MovingLeastSquares<PointXYZ, PointXYZ> filter;
+		filter.setInputCloud(source_cloud);
+		// Object for searching.
+		search::KdTree<PointXYZ>::Ptr kdtree;
+		filter.setSearchMethod(kdtree);
+		// Use all neighbors in a radius of 3cm.
+		filter.setSearchRadius(0.03);
+		// If true, the surface and normal are approximated using a polynomial estimation
+		// (if false, only a tangent one).
+		filter.setPolynomialFit(true);
+		// We can tell the algorithm to also compute smoothed normals (optional).
+		filter.setComputeNormals(true);
 
 		filter.process(*filtered_cloud);
 	}
